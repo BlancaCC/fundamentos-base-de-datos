@@ -25,6 +25,25 @@ ON p.ciudad = s.ciudad ;
 
 
 --versión from 
+SELECT distinct s.nompro, j.nompj, p.nompie
+FROM OPC.proveedor s, OPC.proyecto j, OPC.pieza p
+WHERE s.ciudad = j.ciudad and j.ciudad = p.ciudad;
 
+--select DiSTINCT s.nompro, j.nompj, p.nompie 
+--from OPC.PIEZA p, 
+ --   (select s.ciudad, s.nompro, j.nompj from OPC.PROVEEDOR s, OPC.PROYECTO j where s.ciudad=j.ciudad)
+--WHERE p.ciudad = s.ciudad;
+
+-- EJERCICIO D: nombre de las piezas suministradas por proveedores de París   
+
+SELECT p.nompie 
+FROM OPC.pieza NATURAL JOIN (
+    OPC.venta NATURAL JOIN (
+        SELECT * 
+        FROM OPC.proveedor 
+        WHERE ciudad LIKE 'Londres'
+    )
+); 
+            
 
 
