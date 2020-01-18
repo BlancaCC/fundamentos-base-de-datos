@@ -29,21 +29,42 @@ SELECT distinct s.nompro, j.nompj, p.nompie
 FROM OPC.proveedor s, OPC.proyecto j, OPC.pieza p
 WHERE s.ciudad = j.ciudad and j.ciudad = p.ciudad;
 
---select DiSTINCT s.nompro, j.nompj, p.nompie 
---from OPC.PIEZA p, 
- --   (select s.ciudad, s.nompro, j.nompj from OPC.PROVEEDOR s, OPC.PROYECTO j where s.ciudad=j.ciudad)
---WHERE p.ciudad = s.ciudad;
+-- versión from más eficiente 
+select DiSTINCT subconjunto.nompro, subconjunto.nompj, p.nompie 
+from OPC.PIEZA p, 
+    (select DISTINCT s.ciudad, s.nompro, j.nompj from OPC.PROVEEDOR s, OPC.PROYECTO j where s.ciudad=j.ciudad) subconjunto
+WHERE p.ciudad = subconjunto.ciudad;
 
--- EJERCICIO D: nombre de las piezas suministradas por proveedores de París   
+-- EJERCICIO D: nombre de las piezas suministradas por proveedores de París
 
-SELECT p.nompie 
-FROM OPC.pieza NATURAL JOIN (
-    OPC.venta NATURAL JOIN (
+-- versión con selección natural 
+SELECT DISTINCT p.nompie
+FROM OPC.pieza p NATURAL JOIN (
+    OPC.ventas NATURAL JOIN (
         SELECT * 
         FROM OPC.proveedor 
         WHERE ciudad LIKE 'Londres'
     )
 ); 
-            
+-- versión con in (próxima cálculo relacional)
+SELECT DISTINCT codpie
+FROM ventas where codpro IN
+(Select DISTINCT s.codpro FROM proveedor s where s.ciudad LIKE 'Londres');
 
+-- versión con el exist,  
+SELECT DISTINCT v.codpie 
+    from ventas v where EXISTS (
+    select * from proveedor p 
+        where ( v.codpro = p.codpro and p.cidudad LIKE 'l¡ q
+    )
+);
+
+            
+-- EJERCICIO F. piezas suministradas a algún proyecto por un vendedor que se encuentre en la misma ciudad que el proyecto  
+
+SELECT DISTINCT v.codpie 
+FROM OPC.ventas v NATURAL JOIN (
+    select j.codpj from  OPC.proyecto j NATURAL JOIN OPC.proveedor   
+);
+        
 
