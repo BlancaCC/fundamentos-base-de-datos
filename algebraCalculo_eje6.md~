@@ -1,0 +1,15 @@
+6. Se tiene una BD sobre la información de un congreso con un esquema formado por las siguientes tablas:
+
+---
+INSCRIPCIONES(__*IN_S#__,NOMBRE,PROCEDENCIA) 
+SESIONES(__SES#__,TITULO,COORD#) 
+ARTICULOS(ART #,TITULO) 
+PROGRAMA(__SES#, ART#__,FECHA,HORA_INICIO,HORA FIN,SALA,PONENTE#)
+---
+
+Teniendo en cuenta que tanto los coordinadores como los ponentes han de estar inscritos en el congreso, resolver las siguientes consultas mediante Álgebra Relacional y mediante Cálculo Relacional Orientado a Tuplas: 
+a) Mostrar los nombres de los ponentes que coordinan su propia sesión.
+
+
+b) Seleccionar los coordinadores que coordinan una única sesión. 
+c) Mostrar el tı́tulo de los artı́culos que se exponen en primer y último lugar.
