@@ -55,11 +55,37 @@ FROM ventas where codpro IN
 SELECT DISTINCT v.codpie 
     from ventas v where EXISTS (
     select * from proveedor p 
-        where ( v.codpro = p.codpro and p.cidudad LIKE 'l¡ q
+        where ( v.codpro = p.codpro and p.cidudad LIKE 'l¡'
     )
 );
 
-            
+-- EJERCICIO 3.24 (CUADERNILLO)
+--Encontra los códigos de las pieza suministradas a todos los proyectos loaclizados en Londres  
+
+-- (entendiendo que la pieza tiene que estar en todos los proyectos)
+-- versión utilizando divisor (conjunto Minus) 
+
+
+
+-- (entendiendo que esa pieza está en algún de los proyectos)
+-- versión de cálculo ( con exists)  
+SELECT DISTINCT v.codpie from VENTAS v WHERE EXISTS (
+    SELECT * FROM proyecto p
+        where p.codpj = v.codpj and p.ciudad LIKE 'Londres'
+    
+)
+order by v.codpie DESC;
+
+-- versión por álgebra  
+
+SELECT DISTINCT codpie from VENTAS NATURAL JOIN ( 
+    SELECT DISTINCT codpj from proyecto where ciudad LIKE 'Londres'
+    )
+    ORDER BY codpie ASC;
+        
+
+
+
 -- EJERCICIO F. piezas suministradas a algún proyecto por un vendedor que se encuentre en la misma ciudad que el proyecto  
 
 SELECT DISTINCT v.codpie 

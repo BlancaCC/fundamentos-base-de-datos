@@ -4,7 +4,7 @@ Prácticas de fundamentos de base de datos, conceptos básicos para manejarse po
 
 ## Herramientes  
 
-Yo he utilizo mysql, en concreto el fork de MarinaBD  
+Oracle sql
 
 ### Comandos para trabajar   
 
