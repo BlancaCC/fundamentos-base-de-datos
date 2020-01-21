@@ -1,6 +1,9 @@
--- 3.24 Encontra los códigos de las pieza suministradas a todos los proyectos loaclizados en Londres
+-- ALGUNOS EJERCICIOS RELACIONADOS CON EL  CAPÍTULO 3
+-- Con el objetico de enteder mejor la división, el group by y el having
+-- Espero que os lo paséis muy bien jugando a SQL <3
+-- Enero 2020
 
--- versión álgebra
+-- 3.24 Encontra los códigos de las pieza suministradas a todos los proyectos loaclizados en Londres
 
 -- versión cálculo
 
@@ -149,3 +152,218 @@ HAVING sum(cantidad) = (
        FROM ventas v
        GROUP BY v.codpie
 );
+
+
+-- Otros ejercicios
+-- apoyados en advy99
+-- enlace al repo: ttps://github.com/advy99/FBD/blob/master/Practicas/agregacion_15_05_2019.sql
+-- contar los tipos de piezas diferentes que ha vendido S1
+
+SELECT count( DISTINCT codpi )
+FROM ventas
+WHERE codpro = 'S1'
+
+-- Pedido con mayor númer de unidades
+
+SELECT codpie, codpro, codpj, cantidad
+FROM ventas
+WHERE cantidad = (SELECT max(cantidad) FROM ventas);
+
+-- Número pedidos para cada proveedor
+
+SELECT codpro, count(*)
+FROM ventas
+GROUP BY codpro
+
+-- Número pedidos para cada proveedor cuyo status sea mayor que 2
+-- REVISAR ESTA FORMA 
+SELECT p.codpro, count(*)
+FROM ventas v, proveedor s
+WHERE v.codpro = s.codpro
+GROUP BY codpro
+HAVING s.status > 2
+
+
+       -- v2
+SELECT codpro, count(*)
+FROM ventas
+WHERE codpro IN
+      (SELECT codpro
+      FROM proveedor 
+      WHERE status > 2
+      ); 
+
+-- Número de piezas P1 que se han vendido, que sean de  madrid
+
+-- v1
+SELECT count( v.cantidad)
+FROM ventas v, pieza p
+WHERE v.codpie = p.codpie and codpie = 'P1' and p.ciudad LIKE 'Madrid'
+GROUP BY codpie
+
+-- v2
+
+SELECT count(cantidad)
+FROM ventas
+WHERE codpie IN
+      (SELECT codpie
+      FROM pieza
+      WHERE ciudad LIKE 'Madrid' and
+      	    codpie = 'P1'
+)
+
+-- Número de piezas de Madrid ordenadas de mayor cantidad a menos
+
+SELECT codpie , sum (cantidad)
+FROM ventas
+WHERE codpie IN
+      ( SELECT codpie
+      FROM pieza
+      WHERE ciudad = 'Madrid'
+      )
+GROUP BY codpie
+ORDER BY sum(cantidad), codpie ASC
+
+
+-- Piezas que se hayan vendido más o igual que la P1
+
+SELECT codpie, sum (cantidad)
+FROM ventas
+GROUP BY codpie
+HAVING sum(cantidad) >= (
+       SELECT sum(v.cantidad)
+       FROM ventas v
+       WHERE v.codpie = 'P1' ); 
+      -- GROUP BY v.codpie) innecesario
+
+
+-- Total de piezas vendidas por año desde el 2016 y que el pedido supera las 100 unidades
+
+SELECT to_char(fecha, 'yyyy'), sum(cantidad)
+FROM ventas
+GROUP BY to_char(fecha, 'yyyy')
+HAVING (cantidad > 100) and (to_char(fecha, 'yyyy')>'2016'; 
+
+
+-- Encontrar al proveedor que más piezas a vendido
+--- v1
+SELECT codpro
+FROM venta
+GROUP BY codpro
+HAVING sum(cantidad) =
+       (SELECT max(sum(v.cantidad))
+       FROM venta
+       GROUP BY v.codpro
+       );
+
+--- v2
+
+SELECT codpro
+FROM venta
+GROUP BY codpro
+HAVING sum(cantidad) <= ALL
+       (SELECT sum(cantidad)
+       FROM ventas
+       GROUP BY codpro); 
+
+---------------------------------
+
+
+-- EJERCICIOS ADICIONELES
+
+-- Ejercicio 3.44 Mostrar los proveedores que venden piezas a todas las ciudades de los proyectos a los que suministra ’S3’, sin incluirlo.
+
+SELECT a.codpro
+FROM venta a
+WHERE a.codpro <> 'S3' and
+      NOT EXISTS (
+         (SELECT DISTINCT  p.ciudad FROM venta v, proyecto p
+      	      WHERE v.codpj =p.codpj and v.codpro = 'J1')
+          MINUS
+          (SELECT DISTINCT  p2.ciudad FROM venta v2, proyecto p2
+       	       WHERE v2.codpj = p2.codpj and v.codpro = a.codpro) 
+
+);
+
+
+
+-- Ejercicio 3.58 Coloca el status igual a 1 a aquellos proveedores que sólo suministran la pieza P1.
+
+-- COMPROBAR QUE FUNCIONA
+
+UPDATE  proveedor
+SET status = 1
+WHERE codpro in (
+
+       SELECT s.codpro
+       FROM proveedor s
+       WHERE s.codpie = ALL (SELECT p.codpie
+       	     	      	    FROM proveedor p
+			    WHERE p.codpro = s.codpro) 
+); 
+
+
+
+-- 3.46
+-- No necesita el distinct, le hecha una mano al optimizador pero no sería necesario 
+SELECT codpro
+FROM proveedor pro
+WHERE NOT EXISTS(
+      (SELECT DISTINCT codpie FROM ventas WHERE ventas.codpie='S1')
+      MINUS
+      select DISTINCT codpie FROM ventas where ventas.codpie=pro.codpie)
+);
+
+
+-- 3.47
+
+SELECT codpro, SUM(cantidad)
+FROM ventas pro
+WHERE NOT EXISTS(
+(SELECT DISTINCT codpie FROM ventas WHERE ventas.codpie='S1')
+MINUS
+(SELECT DISTINCT codpie FROM ventas WHERE ventas.codpro=pro.codpie)
+)
+GROUP BY(codpro); 
+
+
+-- 3.48
+SELECT *
+FROM proyecto
+WHERE not exists(
+      select v.codpro from ventas v where v.codpie='P3'
+      MINUS 
+      select v1.codpro from ventas v1 where v1.codpj=proyecto.codpj
+);
+
+
+-- 3.49
+-- MIRAR EL DISTINCT, EL IN TE LO AHORRA
+-- v1 con subconsulta 
+SELECT avg(cantidad)
+FROM  (select distinct v.codpro from ventas v  WHERE  v.codpie='P3') p, ventas v1
+      where p.codpro=v1.codpro;
+
+-- v2 sin subconsulta (aquí hay el mismo problema de arriba no poner el disting
+SELECT avg(cantidad)
+WHERE v1.codpie='P3' and v1.codpro
+
+
+-- 3.50
+
+select index_name, table_name, table_owner from user_indexes; 
+
+-- 3.51
+
+describe ventas; -- la idea es sacar esta información
+
+select column_name NOMBRE, nullable nulo,  data_type Tipo
+from user_tab_columns
+where table_name='VENTAS';
+
+-- 3.52
+
+select codpro, avg(cantidad), to_char(fecha, 'yyyy')
+from ventas
+group by codpro, to_char(fecha, 'yyyy')
+order by codpro, to_char(fecha, 'yyyy')
